@@ -1,3 +1,4 @@
+/* $Id$ */
 #include <rtems.h>
 #include <libcpu/pte121.h>
 #include <libcpu/page.h>
@@ -5,6 +6,27 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <rtems/bspIo.h>
+
+/* 'Electric Fence' for RTEMS/PPC -- simple utility to catch
+ * malloc() heap corruptors.
+ * Wrappers for the allocator routines request extra space
+ * (+ 8k *per malloc request* whether it be malloc(8) or malloc(14000000)!)
+ * and align the end of the malloced area on a page boundary.
+ * The page-protection hardware is engaged to raise an exception
+ * if any access (read or write) beyond the end of the legal area
+ * is attempted.
+ * A variant (see efence_type below) can align the beginning of
+ * blocks on a page boundary instead of the end.
+ *
+ * USAGE:
+ *   Link with your application and specify the linker flags
+ *
+ *	LDFLAGS  += -Wl,--wrap,malloc -Wl,--wrap,realloc -Wl,--wrap,calloc -Wl,--wrap,free
+ *	LDFLAGS  += -Wl,--wrap,_malloc_r -Wl,--wrap,_realloc_r -Wl,--wrap,_calloc_r -Wl,--wrap,_free_r
+ *
+ */
+
+/* Author: Till Straumann, 2005 */
 
 /* Configuration Parameters */
 
