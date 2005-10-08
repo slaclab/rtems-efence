@@ -3,9 +3,12 @@
 #include <libcpu/pte121.h>
 #include <libcpu/page.h>
 #include <string.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <rtems/bspIo.h>
+
+#include <bsp.h>
 
 /* 'Electric Fence' for RTEMS/PPC -- simple utility to catch
  * malloc() heap corruptors.
@@ -68,6 +71,9 @@
 						 *		  (critical section when PTE is modified is ISR protected
 						 *		  within the pte121).
 						 */
+
+/* environment variable to look for */
+#define EFENCE_VAR		"EFENCE"
 
 #define PAGE_ALIGN_DOWN(x) ((unsigned32)(x) & PAGE_MASK)
 #define PAGE_ALIGN_UP(x)   PAGE_ALIGN_DOWN((unsigned32)(x) + PAGE_SIZE - 1)
@@ -145,6 +151,15 @@ static FenceData (* volatile unmap_proc)(void*)			= end_fenced_unmap;
 STATIC void *
 fenced_init(size_t s)
 {
+char *chpt;
+	/* Check if they override it from the commandline */
+	if ( BSP_commandline_string ) {
+		if ( (chpt = strstr(BSP_commandline_string,EFENCE_VAR"=")) ) {
+			efence_type = toupper(chpt[strlen(EFENCE_VAR)+1]) == 'B' ? -1 : 1;
+		} else {
+			efence_type = 0;
+		}
+	}
 	if ( efence_type > 0 ) {
 		malloc_proc = end_fenced_malloc;
 		unmap_proc  = end_fenced_unmap;
