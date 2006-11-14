@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <assert.h>
 #include <rtems/bspIo.h>
 
@@ -75,8 +76,8 @@
 /* environment variable to look for */
 #define EFENCE_VAR		"EFENCE"
 
-#define PAGE_ALIGN_DOWN(x) ((unsigned32)(x) & PAGE_MASK)
-#define PAGE_ALIGN_UP(x)   PAGE_ALIGN_DOWN((unsigned32)(x) + PAGE_SIZE - 1)
+#define PAGE_ALIGN_DOWN(x) ((uint32_t)(x) & PAGE_MASK)
+#define PAGE_ALIGN_UP(x)   PAGE_ALIGN_DOWN((uint32_t)(x) + PAGE_SIZE - 1)
 
 #define SEG_SIZE	0x10000000
 #define PROTECTED_VSID	0x10	/* must be outside of the physical range (4 lsb of VSID)
@@ -85,8 +86,8 @@
 
 static unsigned long ea_offset = 0;
 
-#define EA(x)	((unsigned32)(x)+ea_offset)
-#define PA(x)	((unsigned32)(x)-ea_offset)
+#define EA(x)	((uint32_t)(x)+ea_offset)
+#define PA(x)	((uint32_t)(x)-ea_offset)
 
 #ifdef LOADABLE_TEST
 #define WKALIAS(sym)	__attribute__((weak,alias(#sym)))
@@ -235,7 +236,7 @@ FenceData f;
 	/* align return value so that the block ends on a page boundary */
 	end  = (char*)PAGE_ALIGN_UP(ptr + s);
 	/* Must still preserve heap alignment */
-	rval = (char*)((unsigned32)(end - s) & ~(END_FENCED_MALLOC_ALIGNMENT-1));
+	rval = (char*)((uint32_t)(end - s) & ~(END_FENCED_MALLOC_ALIGNMENT-1));
 
 	/* store original malloc return value in reserved page */
 	f = (FenceData)end;
@@ -249,7 +250,7 @@ FenceData f;
 	assert ( -1 == triv121PgTblMap(pgtbl, TRIV121_SEG_VSID, EA(PAGE_ALIGN_DOWN(rval)), npages, 0, TRIV121_PP_RW_PAGE));
 }
 #else
-	triv121ChangeEaAttributes( (unsigned32)end, -1, 0);
+	triv121ChangeEaAttributes( (uint32_t)end, -1, 0);
 #endif
 
 	return (void*)EA(rval);
@@ -258,7 +259,7 @@ FenceData f;
 STATIC FenceData
 end_fenced_unmap(void *ea)
 {
-unsigned32 p = PAGE_ALIGN_DOWN(ea);
+uint32_t p = PAGE_ALIGN_DOWN(ea);
 APte pte;
 #ifdef CREATE_NEW_MAPPING
 	while ( (pte = triv121UnmapEa(p)) ) {
@@ -282,9 +283,9 @@ FenceData f = ((FenceData)PA(ea))-1;
 #ifdef CREATE_NEW_MAPPING
 char *b;
 	for ( b = ea; b < ea+f->size; b+= PAGE_SIZE )
-		triv121UnmapEa((unsigned32)b);
+		triv121UnmapEa((uint32_t)b);
 #else
-	triv121ChangeEaAttributes( (unsigned32)f, -1, TRIV121_PP_RW_PAGE);
+	triv121ChangeEaAttributes( (uint32_t)f, -1, TRIV121_PP_RW_PAGE);
 #endif
 	return f;
 }
@@ -320,7 +321,7 @@ FenceData f;
 	assert ( -1 == triv121PgTblMap(pgtbl, TRIV121_SEG_VSID, EA(rval), npages, 0, TRIV121_PP_RW_PAGE));
 	}
 #else
-	triv121ChangeEaAttributes( (unsigned32)f, -1, 0);
+	triv121ChangeEaAttributes( (uint32_t)f, -1, 0);
 #endif
 
 	return (void*)EA(rval);
