@@ -362,7 +362,7 @@ FenceData f;
 	if ( s > f->malloc_size )
 		s = f->malloc_size;
 
-	memcpy(rval, f->malloc_addr, s);
+	memcpy(rval, ea, s);
 
 	__real_free(f->malloc_addr);
 
