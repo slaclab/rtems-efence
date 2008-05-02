@@ -2,6 +2,7 @@
 #include <rtems.h>
 #include <libcpu/pte121.h>
 #include <libcpu/page.h>
+#include <libcpu/cpuIdent.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -10,6 +11,10 @@
 #include <rtems/bspIo.h>
 
 #include <bsp.h>
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 /* 'Electric Fence' for RTEMS/PPC -- simple utility to catch
  * malloc() heap corruptors.
@@ -153,6 +158,25 @@ STATIC void *
 fenced_init(size_t s)
 {
 char *chpt;
+
+#if defined(RTEMS_VERSION_ATLEAST) && RTEMS_VERSION_ATLEAST(4,8,99)
+	if ( ! ppc_cpu_has_hw_ptbl_lkup() )
+#else
+	if (   PPC_604  != current_ppc_cpu
+		&& PPC_604e != current_ppc_cpu
+		&& PPC_604r != current_ppc_cpu
+		&& PPC_750  != current_ppc_cpu
+		&& PPC_7400 != current_ppc_cpu
+		&& PPC_7455 != current_ppc_cpu
+		&& PPC_7457 != current_ppc_cpu
+	   )
+#endif
+	{
+		printk("WARNING: this CPU doesn't seem to implement hardware pagetable lookup.\n"); 
+		printk("         Heap Protection NOT engaged.\n");
+		efence_type = 0;
+	}
+
 	/* Check if they override it from the commandline */
 	if ( BSP_commandline_string ) {
 		if ( (chpt = strstr(BSP_commandline_string,EFENCE_VAR"=")) ) {
