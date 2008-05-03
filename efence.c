@@ -159,7 +159,11 @@ fenced_init(size_t s)
 {
 char *chpt;
 
-#if defined(RTEMS_VERSION_ATLEAST) && RTEMS_VERSION_ATLEAST(4,8,99)
+#ifndef RTEMS_VERSION_ATLEAST
+#define RTEMS_VERSION_ATLEAST(M,m,r) 0
+#endif
+
+#if RTEMS_VERSION_ATLEAST(4,8,99)
 	if ( ! ppc_cpu_has_hw_ptbl_lkup() )
 #else
 	if (   PPC_604  != current_ppc_cpu
