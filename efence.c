@@ -181,6 +181,7 @@ char *chpt;
 		efence_type = 0;
 	}
 
+#ifdef HAVE_BSP_COMMANDLINE_STRING
 	/* Check if they override it from the commandline */
 	if ( BSP_commandline_string ) {
 		if ( (chpt = strstr(BSP_commandline_string,EFENCE_VAR"=")) ) {
@@ -189,6 +190,7 @@ char *chpt;
 			efence_type = 0;
 		}
 	}
+#endif
 	if ( efence_type > 0 ) {
 		malloc_proc = end_fenced_malloc;
 		unmap_proc  = end_fenced_unmap;
