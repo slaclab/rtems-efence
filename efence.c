@@ -153,6 +153,10 @@ static void * (* volatile realloc_proc)(void *, size_t)	= fenced_realloc;
 static void   (* volatile free_proc)(void *)			= fenced_free;
 static FenceData (* volatile unmap_proc)(void*)			= end_fenced_unmap;
 
+#if defined(HAVE_BSP_COMMANDLINE_STRING) && ! defined(DECL_BSP_COMMANDLINE_STRING)
+extern char *BSP_commandline_string;
+#endif
+
 /* called only one time */
 STATIC void *
 fenced_init(size_t s)
