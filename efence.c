@@ -161,7 +161,6 @@ extern char *BSP_commandline_string;
 STATIC void *
 fenced_init(size_t s)
 {
-char *chpt;
 
 #ifndef RTEMS_VERSION_ATLEAST
 #define RTEMS_VERSION_ATLEAST(M,m,r) 0
@@ -188,6 +187,7 @@ char *chpt;
 #ifdef HAVE_BSP_COMMANDLINE_STRING
 	/* Check if they override it from the commandline */
 	if ( BSP_commandline_string ) {
+		char *chpt;
 		if ( (chpt = strstr(BSP_commandline_string,EFENCE_VAR"=")) ) {
 			efence_type = toupper(chpt[strlen(EFENCE_VAR)+1]) == 'B' ? -1 : 1;
 		} else {
