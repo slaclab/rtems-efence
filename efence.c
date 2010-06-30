@@ -189,7 +189,7 @@ fenced_init(size_t s)
 	if ( BSP_commandline_string ) {
 		char *chpt;
 		if ( (chpt = strstr(BSP_commandline_string,EFENCE_VAR"=")) ) {
-			efence_type = toupper(chpt[strlen(EFENCE_VAR)+1]) == 'B' ? -1 : 1;
+			efence_type = toupper((unsigned char)chpt[strlen(EFENCE_VAR)+1]) == 'B' ? -1 : 1;
 		} else {
 			efence_type = 0;
 		}
